@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  role     Int
+  password String
+  email    String
+  Script   Script[]
+}
+
+model Role {
+  id          Int    @id @default(autoincrement())
+  description String
+}
+
+model Script {
+  id              Int    @id @default(autoincrement())
+  title           String
+  description     String
+  proposed_budget Int
+  file            String
+  risk            String
+  userId          Int?
+  User            User?  @relation(fields: [userId], references: [id])
+}
+
+model Homologation {
+  id         Int     @id @default(autoincrement())
+  statusId   Int?
+  commentary String
+  Status     Status? @relation(fields: [statusId], references: [id])
+}
+
+model Status {
+  id           Int            @id @default(autoincrement())
+  description  String
+  Homologation Homologation[]
+}
