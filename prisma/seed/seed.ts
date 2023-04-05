@@ -34,6 +34,22 @@ async function main() {
       data: roleData,
     });
   }
+
+  const riskData = [
+    { id: 1, description: 'Low', percent: 5 },
+    { id: 2, description: 'Medium', percent: 10 },
+    { id: 3, description: 'High', percent: 20 },
+  ];
+
+  const isEmptyRisk = await prisma.risk.findMany({}).then((risk) => {
+    return risk.length === 0;
+  });
+
+  if (isEmptyRisk) {
+    await prisma.risk.createMany({
+      data: riskData,
+    });
+  }
 }
 main()
   .then(async () => {
