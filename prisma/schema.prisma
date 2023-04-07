@@ -8,29 +8,38 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  name     String
-  role     Int
-  password String
-  email    String   @unique
-  Script   Script[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  password     String
+  email        String         @unique
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  roleId       Int?
+  Homologation Homologation[]
+  Script       Script[]
+  Role         Role?          @relation(fields: [roleId], references: [id])
 }
 
 model Role {
   id          Int    @id @default(autoincrement())
   description String
+  User        User[]
 }
 
 model Script {
-  id              Int    @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   title           String
   description     String
   proposed_budget Int
   file            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   riskId          Int?
   userId          Int?
-  Risk            Risk?  @relation(fields: [riskId], references: [id])
-  User            User?  @relation(fields: [userId], references: [id])
+  Risk            Risk?         @relation(fields: [riskId], references: [id])
+  homologationId  Int?
+  User            User?         @relation(fields: [userId], references: [id])
+  Homologation    Homologation? @relation(fields: [homologationId], references: [id])
 }
 
 model Risk {
@@ -41,10 +50,15 @@ model Risk {
 }
 
 model Homologation {
-  id         Int     @id @default(autoincrement())
-  statusId   Int?
+  id         Int      @id @default(autoincrement())
   commentary String
-  Status     Status? @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  userId     Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Script     Script[]
+  User       User?    @relation(fields: [userId], references: [id])
+  Status     Status?  @relation(fields: [statusId], references: [id])
 }
 
 model Status {
