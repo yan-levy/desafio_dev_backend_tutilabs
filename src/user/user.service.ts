@@ -8,7 +8,7 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
-    const alreadyExists = this.prisma.user.findFirst({
+    const alreadyExists = await this.prisma.user.findFirst({
       where: {
         email: createUserDto.email,
       },
@@ -25,7 +25,14 @@ export class UserService {
       password: await bcrypt.hash(createUserDto.password, 10),
     };
 
-    const createdUser = await this.prisma.user.create({ data });
+    const createdUser = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: data.password,
+        name: createUserDto.name,
+        roleId: createUserDto.role,
+      },
+    });
 
     return {
       ...createdUser,
@@ -36,6 +43,61 @@ export class UserService {
   findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
+    });
+  }
+
+  async findAll() {
+    return await this.prisma.user.findMany({
+      where: {
+        OR: [{ roleId: 1 }, { roleId: 2 }],
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true,
+        Role: {
+          select: { description: true },
+        },
+      },
+      orderBy: {
+        roleId: 'asc',
+      },
+    });
+  }
+
+  async delete(id: number) {
+    //TODO: Obs: o sistema não poderá excluir caso já exista um roteiro aprovado pela produtora e vinculado a um roteirista.
+    const cannotBeDeleted = await this.prisma.script.findFirst({
+      where: {
+        AND: [{ userId: id }, { Homologation: { statusId: { not: 2 } } }],
+      },
+    });
+
+    if (cannotBeDeleted) {
+      throw new HttpException(
+        `This user have active script(s), therefore, he cannot be deleted`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.prisma.user.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    return await this.prisma.user.findFirst({
+      where: { id },
+      include: {
+        Role: {
+          select: {
+            description: true,
+          },
+        },
+      },
     });
   }
 }
