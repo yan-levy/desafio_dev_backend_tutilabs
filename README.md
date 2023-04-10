@@ -1,4 +1,4 @@
-![My Image](/prisma/db-diagram/my-image.jpg)
+![My Image](./prisma/db-diagram/tnetlabs.png)
 
 ## Running the app
 
