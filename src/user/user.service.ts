@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -43,6 +44,18 @@ export class UserService {
   findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
+    });
+  }
+
+  getUser(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roleId: true,
+      },
     });
   }
 
@@ -97,6 +110,22 @@ export class UserService {
             description: true,
           },
         },
+      },
+    });
+  }
+
+  async update(updateUserDto: UpdateUserDto) {
+    const data = {
+      ...updateUserDto,
+      password: await bcrypt.hash(updateUserDto.password, 10),
+    };
+    return await this.prisma.user.update({
+      where: { id: data.id },
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        roleId: data.roleId,
       },
     });
   }

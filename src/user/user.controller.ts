@@ -1,20 +1,27 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { IsPublic } from 'src/auth/decorators/is-public.decorator';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { User } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import RoleGuard from 'src/auth/roles/roles.guard';
+import { Roles } from 'src/auth/roles/roles.decorator';
+import { Role } from 'src/auth/roles/roles.enum';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard, RoleGuard)
+@Roles(Role.Master)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('me')
-  getMe(@CurrentUser() user: User) {
-    return user;
-  }
-
-  @IsPublic()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -33,5 +40,10 @@ export class UserController {
   @Get(':id')
   findOne(@Param() { id }) {
     return this.userService.findOne(+id);
+  }
+
+  @Patch()
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(updateUserDto);
   }
 }
