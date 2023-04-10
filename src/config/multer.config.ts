@@ -9,9 +9,13 @@ export const multerConfig = {
 };
 
 export const multerOptions = {
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.match(/\/(txt|pdf)$/)) {
-      cb(null, true);
+  fileFilter: (req, file: any, cb) => {
+    cb(null, true);
+    // console.log({ file: file });
+
+    // console.log(file.mimetype.match(/\/(pdf|txt)$/));
+
+    if (file.mimetype.match(/\/(pdf|txt)$/)) {
     } else {
       cb(
         new HttpException(
