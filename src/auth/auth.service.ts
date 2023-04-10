@@ -6,6 +6,7 @@ import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { UserPayload } from './models/UserPayload';
 import { UserToken } from './models/UserToken';
+import { UserFromJwt } from './models/UserFromJwt';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       name: user.name,
+      role: user.roleId,
     };
 
     return {
@@ -43,5 +45,9 @@ export class AuthService {
     throw new UnauthorizedError(
       'Email address or password provided is incorrect.',
     );
+  }
+
+  async getUser(email: string): Promise<UserFromJwt> {
+    return await this.userService.getUser(email);
   }
 }
